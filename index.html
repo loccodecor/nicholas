@@ -180,7 +180,7 @@
         <label for="price">手机价格 (元):</label>
         <input type="number" id="price" placeholder="输入手机价格" value="0" aria-label="手机价格输入框">
     </div>
-    <div class="tip">10%~20%首付方案请咨询客服人员</div>
+    <div class="tip">0~10%首付方案请咨询客服人员</div>
 
     <div class="plan-buttons" id="planButtons"></div>
 
@@ -196,17 +196,20 @@
 <script>
 class RentalCalculator {
     constructor() {
-        // 仅保留 6、9、12 期的 30%、40%、50% 首付
+        // 按用户要求新增并排序所有首付方案
         this.plans = [
-            { ratio: 0.30, period: 6, name: '30%首付 6期' },
-            { ratio: 0.40, period: 6, name: '40%首付 6期' },
-            { ratio: 0.50, period: 6, name: '50%首付 6期' },
-            { ratio: 0.30, period: 9, name: '30%首付 9期' },
-            { ratio: 0.40, period: 9, name: '40%首付 9期' },
-            { ratio: 0.50, period: 9, name: '50%首付 9期' },
-            { ratio: 0.30, period: 12, name: '30%首付 12期' },
-            { ratio: 0.40, period: 12, name: '40%首付 12期' },
-            { ratio: 0.50, period: 12, name: '50%首付 12期' },
+            { ratio: 0.20, period: 6,  installments: 5, multiplier: 1.197, name: '20%首付 6期' },
+            { ratio: 0.20, period: 9,  installments: 8, multiplier: 1.3,   name: '20%首付 9期' },
+            { ratio: 0.20, period: 12, installments: 10,multiplier: 1.35,  name: '20%首付 12期' },
+            { ratio: 0.30, period: 6,  installments: 4, multiplier: 1.197, name: '30%首付 6期' },
+            { ratio: 0.30, period: 9,  installments: 7, multiplier: 1.3,   name: '30%首付 9期' },
+            { ratio: 0.30, period: 12, installments: 9, multiplier: 1.35,  name: '30%首付 12期' },
+            { ratio: 0.40, period: 6,  installments: 4, multiplier: 1.197, name: '40%首付 6期' },
+            { ratio: 0.40, period: 9,  installments: 7, multiplier: 1.3,   name: '40%首付 9期' },
+            { ratio: 0.40, period: 12, installments: 9, multiplier: 1.35,  name: '40%首付 12期' },
+            { ratio: 0.50, period: 6,  installments: 4, multiplier: 1.197, name: '50%首付 6期' },
+            { ratio: 0.50, period: 9,  installments: 7, multiplier: 1.3,   name: '50%首付 9期' },
+            { ratio: 0.50, period: 12,installments: 9, multiplier: 1.35,  name: '50%首付 12期' },
         ];
         this.selectedIndex = 0;
         this.debounceTimer = null;
@@ -253,22 +256,12 @@ class RentalCalculator {
     performCalculation(price) {
         const plan = this.plans[this.selectedIndex];
         const down = price * plan.ratio;
-        let total, installments;
-        // 6期方案 → 4期； 9期 → 7期； 12期 → 9期
-        if (plan.period === 6) {
-            total = price * 1.197;
-            installments = 4;
-        } else if (plan.period === 9) {
-            total = price * 1.3;
-            installments = 7;
-        } else { // 12
-            total = price * 1.35;
-            installments = 9;
-        }
+        const total = price * plan.multiplier;
+        const installments = plan.installments;
         const remaining = total - down;
         const each = remaining / installments;
 
-        // 分期信息展示，不含“首付比例”一行
+        // 分期信息展示
         document.getElementById('info').innerHTML = `
             <p>手机售价: <span>¥${price.toFixed(2)}</span></p >
             <p>分期方案: <span style="color:#666">${plan.name}</span></p >
